@@ -1,0 +1,160 @@
+const opcao = Number(prompt(
+`===============================
+LISTA DE EXERCÍCIOS - FUNÇÕES
+===============================
+1 - Minha Primeira Função
+2 - Função com Nome
+3 - Apresentar Aluno
+4 - Somar Dois Números
+5 - Dobro de um Número
+6 - Calcular Média
+7 - Verificar Número
+8 - Verificar Aprovação
+9 - Calculadora Simples
+10 - Caixa Eletrônico
+11 - Pedra, Papel e Tesoura
+===============================
+Digite a opção desejada:`));
+
+switch(opcao){
+
+    case 1:
+        function mostrarMensagem(){
+            console.log("Olá, JavaScript!");
+        }
+        mostrarMensagem();
+        break;
+
+    case 2:
+        function cumprimentar(nome){
+            console.log(`Olá, ${nome}!`);
+        }
+        cumprimentar("Maria");
+        break;
+
+    case 3:
+        function apresentarAluno(nome, idade){
+            console.log(`Meu nome é ${nome} e tenho ${idade} anos.`);
+        }
+        apresentarAluno("João",16);
+        break;
+
+    case 4:
+        function somar(a,b){
+            console.log("Resultado:", a+b);
+        }
+        somar(5,3);
+        break;
+
+    case 5:
+        function dobro(numero){
+            console.log("Dobro:", numero*2);
+        }
+        dobro(7);
+        break;
+
+    case 6:
+        function calcularMedia(n1,n2){
+            console.log("Média:", (n1+n2)/2);
+        }
+        calcularMedia(8,6);
+        break;
+
+    case 7:
+        function verificarNumero(numero){
+            if(numero > 0){
+                console.log("Positivo");
+            }else if(numero < 0){
+                console.log("Negativo");
+            }else{
+                console.log("Zero");
+            }
+        }
+        verificarNumero(-5);
+        break;
+
+    case 8:
+        function verificarAprovacao(media){
+            if(media >= 6){
+                console.log("Aprovado");
+            }else{
+                console.log("Reprovado");
+            }
+        }
+        verificarAprovacao(7);
+        break;
+
+    case 9:
+        function calculadora(n1,n2,operacao){
+
+            switch(operacao){
+
+                case "+":
+                    console.log("Resultado:", n1+n2);
+                    break;
+
+                case "-":
+                    console.log("Resultado:", n1-n2);
+                    break;
+
+                case "*":
+                    console.log("Resultado:", n1*n2);
+                    break;
+
+                case "/":
+                    if(n2 != 0){
+                        console.log("Resultado:", n1/n2);
+                    }else{
+                        console.log("Não é possível dividir por zero.");
+                    }
+                    break;
+
+                default:
+                    console.log("Operação inválida.");
+            }
+        }
+
+        calculadora(10,5,"*");
+        break;
+
+    case 10:
+
+        let saldo = 1000;
+
+        function sacar(valor){
+            if(valor <= saldo){
+                saldo -= valor;
+                console.log("Saque realizado.");
+                console.log("Saldo restante: R$", saldo);
+            }else{
+                console.log("Saldo insuficiente.");
+            }
+        }
+
+        sacar(300);
+        break;
+
+    case 11:
+
+        function pedraPapelTesoura(j1,j2){
+
+            if(j1 === j2){
+                console.log("Empate");
+            }else if(
+                (j1 === "pedra" && j2 === "tesoura") ||
+                (j1 === "tesoura" && j2 === "papel") ||
+                (j1 === "papel" && j2 === "pedra")
+            ){
+                console.log("Jogador 1 venceu");
+            }else{
+                console.log("Jogador 2 venceu");
+            }
+
+        }
+
+        pedraPapelTesoura("pedra","tesoura");
+        break;
+
+    default:
+        console.log("Opção inválida.");
+}
