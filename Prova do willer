@@ -1,172 +1,201 @@
-CREATE TABLE aeronaves (
+CREATE TABLE investidores (
     id SERIAL PRIMARY KEY,
-    modelo VARCHAR(100) NOT NULL,
-    codigo_cauda VARCHAR(10) UNIQUE NOT NULL,
-    capacidade INTEGER NOT NULL CHECK (capacidade > 0)
+    nome VARCHAR(100) NOT NULL,
+    cpf CHAR(11) NOT NULL UNIQUE,
+    nivel_experiencia INT DEFAULT 0,
+    CHECK (nivel_experiencia >= 0)
 );
 
 
-CREATE TABLE pilotos (
+CREATE TABLE carteiras (
     id SERIAL PRIMARY KEY,
-    nome VARCHAR(150) NOT NULL,
-    codigo_anac CHAR(6) UNIQUE NOT NULL,
-    horas_voo INTEGER DEFAULT 0 CHECK (horas_voo >= 0)
+    investidor_id INT NOT NULL,
+    endereco_wallet VARCHAR(100) NOT NULL UNIQUE,
+    rede_blockchain VARCHAR(30) NOT NULL,
+    saldo_usd DECIMAL(15,2) DEFAULT 0.00,
+    status VARCHAR(20) NOT NULL,
+
+    FOREIGN KEY (investidor_id)
+        REFERENCES investidores(id),
+
+    CHECK (saldo_usd >= 0),
+    CHECK (status IN (
+        'Ativa',
+        'Em Analise',
+        'Bloqueada',
+        'Pausada'
+    ))
 );
 
 
-CREATE TABLE voos (
+CREATE TABLE corretoras (
     id SERIAL PRIMARY KEY,
-    aeronave_id INTEGER NOT NULL,
-    piloto_id INTEGER NOT NULL,
-    numero_voo VARCHAR(20) NOT NULL,
-    origem VARCHAR(100) NOT NULL,
-    destino VARCHAR(100) NOT NULL,
-    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    status VARCHAR(20) DEFAULT 'Agendado',
+    nome_exchange VARCHAR(100) NOT NULL,
+    cnpj CHAR(14) NOT NULL UNIQUE,
+    email_suporte VARCHAR(100) NOT NULL UNIQUE
+);
 
+CREATE TABLE criptomoedas (
+    id SERIAL PRIMARY KEY,
+    corretora_id INT NOT NULL,
+    nome_moeda VARCHAR(50) NOT NULL,
+    preco_unitario_usd DECIMAL(15,2) NOT NULL,
+    categoria VARCHAR(20) NOT NULL,
 
-    FOREIGN KEY (aeronave_id) REFERENCES aeronaves(id),
-    FOREIGN KEY (piloto_id) REFERENCES pilotos(id),
+    FOREIGN KEY (corretora_id)
+        REFERENCES corretoras(id),
 
-
-    CHECK (status IN ('Agendado', 'Em Voo', 'Concluido', 'Cancelado'))
+    CHECK (preco_unitario_usd > 0),
+    CHECK (categoria IN (
+        'Layer1',
+        'DeFi',
+        'Memecoin',
+        'Stablecoin'
+    ))
 );
 
 
-
-
-CREATE TABLE passageiros (
+CREATE TABLE transacoes_cripto (
     id SERIAL PRIMARY KEY,
-    nome VARCHAR(150) NOT NULL,
-    cpf CHAR(11) UNIQUE NOT NULL,
-    email VARCHAR(150) UNIQUE NOT NULL
+    carteira_id INT NOT NULL,
+    criptomoeda_id INT NOT NULL,
+    quantidade DECIMAL(15,6) NOT NULL,
+    valor_pago DECIMAL(15,2) NOT NULL,
+    data_transacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (carteira_id)
+        REFERENCES carteiras(id),
+
+    FOREIGN KEY (criptomoeda_id)
+        REFERENCES criptomoedas(id),
+
+    CHECK (quantidade > 0),
+    CHECK (valor_pago > 0)
 );
 
-
-
-
-CREATE TABLE passagens (
-    id SERIAL PRIMARY KEY,
-    voo_id INTEGER NOT NULL,
-    passageiro_id 296);
-INSERT INTO passagens
-(voo_id, passageiro_id, assento, classe, valor)
+INSERT INTO investidores
+(nome, cpf, nivel_experiencia)
 VALUES
-(1, 1, '12A', 'Economica', 450.00),
-(2, 2, '05B', 'Executiva', 950.00),
-(3, 3, '08C', 'Economica', 600.00),
-(5, 4, '02A', 'Executiva', 1200.00),
-(1, 5, '14D', 'Economica', 500.00);
+('Joao Silva', '12345678901', 2),
+('Maria Oliveira', '23456789012', 3),
+('Pedro Santos', '34567890123', 1),
+('Ana Costa', '45678901234', 0),
+('Lucas Almeida', '56789012345', 4);
 
 
-
-
-INSERT INTO passageiros (nome, cpf, email)
+INSERT INTO carteiras
+(investidor_id, endereco_wallet, rede_blockchain, saldo_usd, status)
 VALUES
-('Ana Costa', '11111111111', 'ana@email.com'),
-('Bruno Lima', '22222222222', 'bruno@email.com'),
-('Carla Mendes', '33333333333', 'carla@email.com'),
-('Daniel Rocha', '44444444444', 'daniel@email.com'),
-('Eduardo Martins', '55555555555', 'eduardo@email.com');
+(1, '0x71C...0A', 'Ethereum', 5000.00, 'Ativa'),
+(2, '0x82D...1B', 'Bitcoin', 8500.00, 'Em Analise'),
+(3, '0x93E...2C', 'Solana', 1200.00, 'Bloqueada'),
+(4, '0xA4F...3D', 'Ethereum', 3000.00, 'Ativa'),
+(5, '0xB5G...4E', 'Solana', 750.00, 'Pausada');
+-- VISUALIZACAO DAS VIEWS
 
 
-
-
-INSERT INTO pilotos (nome, codigo_anac, horas_voo)
+INSERT INTO corretoras
+(nome_exchange, cnpj, email_suporte)
 VALUES
-('Aura JR', 'ANAC01', 3500),
-('Tung Tung sahur', 'ANAC02', 4200),
-('aparente mente', 'ANAC03', 2800),
-('ta dando costa', 'ANAC04', 5100),
-('kotoba no kano', 'ANAC05', 1900);
+('Binance', '12345678000101', 'suporte@binance.com'),
+('Coinbase', '23456789000102', 'suporte@coinbase.com'),
+('Kraken', '34567890000103', 'suporte@kraken.com'),
+('Bybit', '45678901000104', 'suporte@bybit.com'),
+('OKX', '56789012000105', 'suporte@okx.com');
 
 
-
-
-
-
-
-
-INSERT INTO voos
-(aeronave_id, piloto_id, numero_voo, origem, destino, data_hora, status)
+INSERT INTO criptomoedas
+(corretora_id, nome_moeda, preco_unitario_usd, categoria)
 VALUES
-(1, 1, 'BR101', 'Sao Paulo', 'Rio de Janeiro', '2026-10-05 08:00:00', 'Agendado'),
-(2, 2, 'BR202', 'Florianopolis', 'Sao Paulo', '2026-10-05 10:30:00', 'Em Voo'),
-(3, 3, 'BR303', 'Brasilia', 'Salvador', '2026-10-06 14:00:00', 'Concluido'),
-(4, 4, 'BR404', 'Recife', 'Fortaleza', '2026-10-06 16:30:00', 'Cancelado'),
-(5, 5, 'BR505', 'Rio de Janeiro', 'Manaus', '2026-10-07 20:00:00', 'Agendado');
+(1, 'Bitcoin', 95000.00, 'Layer1'),
+(2, 'Ethereum', 3500.00, 'Layer1'),
+(3, 'Uniswap', 12.50, 'DeFi'),
+(4, 'Dogecoin', 0.25, 'Memecoin'),
+(5, 'USDT', 1.00, 'Stablecoin');
 
 
-
-
-SELECT
-    v.numero_voo,
-    v.origem,
-    v.destino,
-    a.modelo,
-    p.nome AS piloto
-FROM voos v
-JOIN aeronaves a
-    ON v.aeronave_id = a.id
-JOIN pilotos p
-    ON v.piloto_id = p.id
-WHERE v.status IN ('Agendado', 'Em Voo');
-
-
+INSERT INTO transacoes_cripto
+(carteira_id, criptomoeda_id, quantidade, valor_pago, data_transacao)
+VALUES
+(1, 1, 0.020000, 1900.00, '2026-10-01 10:30:00'),
+(2, 2, 1.000000, 3500.00, '2026-10-02 11:00:00'),
+(3, 3, 100.000000, 1250.00, '2026-10-03 14:20:00'),
+(4, 4, 3000.000000, 750.00, '2026-10-04 09:15:00'),
+(5, 5, 800.000000, 800.00, '2026-10-05 16:45:00');
 
 
 SELECT
-    classe,
-    SUM(valor) AS total_arrecadado
-FROM passagens
-GROUP BY classe;
+    c.endereco_wallet,
+    c.rede_blockchain,
+    c.saldo_usd,
+    i.nome AS nome_investidor,
+    i.cpf
+FROM carteiras c
+INNER JOIN investidores i
+    ON c.investidor_id = i.id
+WHERE c.status IN ('Ativa', 'Em Analise');
+SELECT * FROM vw_painel_carteiras;
 
 
 SELECT
-    p.nome AS passageiro,
-    v.numero_voo,
-    pa.assento,
-    pa.valor
-FROM passagens pa
-JOIN passageiros p
-    ON pa.passageiro_id = p.id
-JOIN voos v
-    ON pa.voo_id = v.id
-WHERE pa.classe = 'Executiva'
-  AND pa.valor > 800
-ORDER BY pa.valor DESC;
-
-
-
-
-CREATE VIEW vw_painel_aeroporto AS
-SELECT
-    v.numero_voo,
-    v.data_hora,
-    v.origem,
-    v.destino,
-    a.modelo,
-    a.codigo_cauda,
-    v.status
-FROM voos v
-JOIN aeronaves a
-    ON v.aeronave_id = a.id;
-
-
-
-
-CREATE VIEW vw_faturamento_por_voo AS
-SELECT
-    v.id AS voo_id,
-    v.numero_voo,
-    v.destino,
-    COUNT(pa.id) AS quantidade_passageiros,
-    COALESCE(SUM(pa.valor), 0) AS receita_total
-FROM voos v
-LEFT JOIN passagens pa
-    ON v.id = pa.voo_id
+    co.nome_exchange,
+    COALESCE(SUM(t.valor_pago), 0) AS total_movimentado
+FROM corretoras co
+INNER JOIN criptomoedas cr
+    ON co.id = cr.corretora_id
+LEFT JOIN transacoes_cripto t
+    ON cr.id = t.criptomoeda_id
 GROUP BY
-    v.id,
-    v.numero_voo,
-    v.destino;
+    co.id,
+    co.nome_exchange
+ORDER BY total_movimentado DESC;
 
+
+SELECT
+    ca.endereco_wallet,
+    cr.nome_moeda,
+    t.quantidade,
+    cr.preco_unitario_usd,
+    t.valor_pago,
+    t.data_transacao
+FROM transacoes_cripto t
+INNER JOIN carteiras ca
+    ON t.carteira_id = ca.id
+INNER JOIN criptomoedas cr
+    ON t.criptomoeda_id = cr.id
+WHERE t.valor_pago > 500.00
+ORDER BY t.valor_pago DESC;
+
+
+CREATE OR REPLACE VIEW vw_painel_carteiras AS
+SELECT
+    ca.endereco_wallet,
+    ca.rede_blockchain,
+    ca.status,
+    ca.saldo_usd,
+    i.nome AS nome_investidor,
+    i.cpf
+FROM carteiras ca
+INNER JOIN investidores i
+    ON ca.investidor_id = i.id;
+
+
+CREATE OR REPLACE VIEW vw_investimento_total_carteiras AS
+SELECT
+    ca.id AS carteira_id,
+    ca.endereco_wallet,
+    ca.saldo_usd,
+    COUNT(t.id) AS quantidade_total_transacoes,
+    COALESCE(SUM(t.valor_pago), 0) AS custo_total_acumulado
+FROM carteiras ca
+LEFT JOIN transacoes_cripto t
+    ON ca.id = t.carteira_id
+GROUP BY
+    ca.id,
+    ca.endereco_wallet,
+    ca.saldo_usd;
+
+
+    SELECT * FROM vw_painel_carteiras;
+
+    SELECT * FROM vw_investimento_total_carteiras;
